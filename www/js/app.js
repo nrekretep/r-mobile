@@ -13,7 +13,16 @@ app.config(function($stateProvider, $urlRouterProvider) {
     templateUrl: 'templates/login.html',
     controller: 'LoginController'
   });
+  $stateProvider.state('documents', {
+    url: '/documents',
+    templateUrl: 'templates/documents.html',
+    controller: 'DocumentsController'
+  });
 });
+
+app.config(['$httpProvider', function($httpProvider) {
+  $httpProvider.defaults.withCredentials = true;
+}]);
 
 app.controller('RmobileController', function($scope, $ionicModal) {
 
@@ -36,9 +45,13 @@ app.controller('RmobileController', function($scope, $ionicModal) {
   //}});
 });
 
-app.controller('LoginController', function($scope, $http, $httpParamSerializer){
-  $scope.loginData = {};
+app.controller('DocumentsController', function($scope) {
 
+});
+
+app.controller('LoginController', function($scope, $http, $httpParamSerializer, $state, $ionicPopup){
+  $scope.loginData = {};
+  $scope.titleText = 'Rembli mobile';
   // Called when the form is submitted
   $scope.login = function() {
 
@@ -46,26 +59,38 @@ app.controller('LoginController', function($scope, $http, $httpParamSerializer){
       url: 'http://rembli.com/documents/api/login',
         method: 'POST',
       headers: {
-      'Content-Type': 'application/x-www-form-urlencoded' // Note the appropriate header
+      'Content-Type': 'application/x-www-form-urlencoded',
+       'Accept': 'text/html'// Note the appropriate header
     },
-    //transformRequest: function(obj) {
-    //  var str = [];
-    //  for(var p in obj)
-    //    str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-    //  return str.join("&");
-    //},
-    //data: {username: $scope.loginData.username, password: $scope.loginData.password}
-    data: $httpParamSerializer($scope.loginData)
+    data: $httpParamSerializer($scope.loginData),
+    withCredentials: true
   };
 
-    $http(request).then(function(resp) {
-      console.log('Success', JSON.stringify(resp));
-      $scope.loginData.username = resp.data;
-      // For JSON responses, resp.data contains the result
-    }, function(err) {
+    $http(request).success(function(data, status, header) {
 
-      console.error('ERR', JSON.stringify(err));
-      // err.status will contain the status code
+      $scope.loginData.key = data;
+
+      var h = header('Cookie');
+      //console.log(h);
+      //console.log(JSON.stringify(header()));
+      //console.log(data);
+
+      $http.get('http://www.rembli.com/documents/api/userInfo', {withCredentials: true}).then(function(resp){
+        $scope.loginData.username = resp.data.username;
+        $scope.loginData.email = resp.data.email;
+
+        $scope.title = ' (' + $scope.loginData.key + ')';
+
+        $state.go('documents');
+
+
+      }, function(err){
+        $ionicPopup.alert({title: 'Error', template: 'Getting additional user info failed.'});
+      });
+
+    }).error(function(data, status) {
+
+      $ionicPopup.alert({title: 'Error', template: 'Login failed.'});
     });
 
     $scope.loginData.password = "";
