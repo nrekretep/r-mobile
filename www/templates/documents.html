@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-asdasdasdfadsf
-</body>
-</html>
+<ion-view view-title="Documents" name="documents-view">
+  <ion-content class="padding">
+    <ion-list>
+      <ion-item ng-repeat="document in documents">
+        {{document.iddocument}} - {{document.note}}
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-view>
+
+

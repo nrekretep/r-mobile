@@ -45,58 +45,124 @@ app.controller('RmobileController', function($scope, $ionicModal) {
   //}});
 });
 
-app.controller('DocumentsController', function($scope) {
+app.controller('DocumentsController', function($scope, DocumentsService) {
+
+  if($scope.documents == undefined)
+  {
+    DocumentsService.getDocuments().then(function(){
+      $scope.documents = DocumentsService.documents;
+    }, function(){
+      $ionicPopup.alert({title: 'Error', template: 'Loading documents failed.'});
+    })
+  }
 
 });
 
-app.controller('LoginController', function($scope, $http, $httpParamSerializer, $state, $ionicPopup){
+app.controller('LoginController', function($rootScope, $scope, LoginService, $state, $ionicPopup){
   $scope.loginData = {};
-  $scope.titleText = 'Rembli mobile';
+  $rootScope.titleText = 'Rembli mobile';
   // Called when the form is submitted
   $scope.login = function() {
 
-  var request = {
-      url: 'http://rembli.com/documents/api/login',
-        method: 'POST',
-      headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-       'Accept': 'text/html'// Note the appropriate header
-    },
-    data: $httpParamSerializer($scope.loginData),
-    withCredentials: true
-  };
+    LoginService.loginUser($scope.loginData).then(function(){
 
-    $http(request).success(function(data, status, header) {
-
-      $scope.loginData.key = data;
-
-      var h = header('Cookie');
-      //console.log(h);
-      //console.log(JSON.stringify(header()));
-      //console.log(data);
-
-      $http.get('http://www.rembli.com/documents/api/userInfo', {withCredentials: true}).then(function(resp){
-        $scope.loginData.username = resp.data.username;
-        $scope.loginData.email = resp.data.email;
-
-        $scope.title = ' (' + $scope.loginData.key + ')';
+      LoginService.getUserInfo().then(function(){
+        // success
+        $rootScope.title = ' (' + LoginService.email + ')';
 
         $state.go('documents');
 
-
       }, function(err){
         $ionicPopup.alert({title: 'Error', template: 'Getting additional user info failed.'});
+        console.log(JSON.stringify(err));
       });
 
-    }).error(function(data, status) {
-
+    }, function(err){
       $ionicPopup.alert({title: 'Error', template: 'Login failed.'});
+      console.log(JSON.stringify(err));
     });
 
     $scope.loginData.password = "";
   };
 
 });
+
+app.service('LoginService', function($http, $httpParamSerializer, $q) {
+    return {
+          bearerToken: '',
+          email: '',
+          username: '',
+          loginUser: function(loginData) {
+
+            var request = {
+              url: 'http://rembli.com/documents/api/login',
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': 'text/html'
+              },
+              data: $httpParamSerializer(loginData)
+            };
+
+            var q = $q.defer();
+            var self = this; // store current scope
+
+            $http(request).then(function(res) {
+
+              self.bearerToken = res.data;
+
+              q.resolve();
+
+          }, function(res) {
+            q.reject(res);
+          });
+
+          return q.promise;
+
+        },
+        getUserInfo: function() {
+
+          var self = this;
+          var q = $q.defer();
+
+          $http.get('http://www.rembli.com/documents/api/userInfo', {headers: {Authorization: 'Bearer ' + self.bearerToken}}).then(function(resp){
+            self.username = resp.data.username;
+            self.email = resp.data.email;
+
+            q.resolve();
+
+          }, function(err){
+            q.reject(err);
+          });
+
+          return q.promise;
+
+        }
+  }
+});
+
+app.service('DocumentsService', function($http, LoginService, $q) {
+    return {
+     documents: {},
+      getDocuments: function(){
+        var self = this;
+        var q = $q.defer();
+
+        $http.get('http://www.rembli.com/documents/api/documents', {headers: {Authorization: 'Bearer ' + LoginService.bearerToken}}).then(function(resp){
+
+          self.documents = resp.data;
+          console.log(JSON.stringify(self));
+          q.resolve();
+
+        }, function(err){
+          q.reject(err);
+        });
+
+        return q.promise;
+      }
+    }
+  }
+);
 
 app.run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
