@@ -1,20 +1,30 @@
 <ion-view view-title="Documents" name="documents-view">
-  <ion-content class="padding">
-    <ion-header-bar class="bar-stable" title="titleText">
-      <button class="button button-icon" ng-click="newTask()">
-        <i class="icon ion-paperclip"></i>
-      </button>
-    </ion-header-bar>
-    <ion-refresher
-      pulling-text="Pull to refresh..."
-      on-refresh="doRefresh()">
-    </ion-refresher>
-    <ion-list>
-      <ion-item ng-repeat="document in documents">
-        {{document.iddocument}} - {{document.note}}
-      </ion-item>
-    </ion-list>
+  <ion-refresher
+    pulling-text="Pull to refresh..."
+    on-refresh="doRefresh()">
+  </ion-refresher>
+  <ion-content ng-class="{expanded:$scope.isExpanded}">
+    <div class="hero slide-up" style="background-image: url('img/splash.jpg');">
+      <div class="content">
+        <div class="avatar" style="background-image: url('img/ionic.png');"></div>
+        <h3><a class="light">{{title}}</a></h3>
+        <h4>{{subTitle}}</h4>
+      </div>
+    </div>
+    <div class="tabs tabs-dark tabs-icon-top static">
+      <a class="tab-item">
+        <i class="icon ion-images"></i> Documents
+      </a>
+    </div>
+    <div class="list animate-fade-slide-in-right">
+      <ion-list>
+        <ion-item ng-repeat="document in documents">
+          {{document.iddocument}} - {{document.note}}
+        </ion-item>
+      </ion-list>
+    </div>
   </ion-content>
 </ion-view>
+
 
 
