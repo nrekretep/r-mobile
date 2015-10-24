@@ -1,5 +1,14 @@
 <ion-view view-title="Documents" name="documents-view">
   <ion-content class="padding">
+    <ion-header-bar class="bar-stable" title="titleText">
+      <button class="button button-icon" ng-click="newTask()">
+        <i class="icon ion-paperclip"></i>
+      </button>
+    </ion-header-bar>
+    <ion-refresher
+      pulling-text="Pull to refresh..."
+      on-refresh="doRefresh()">
+    </ion-refresher>
     <ion-list>
       <ion-item ng-repeat="document in documents">
         {{document.iddocument}} - {{document.note}}
