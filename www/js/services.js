@@ -1,7 +1,8 @@
 /**
  * Created by peter on 24.10.15.
  */
-angular.module('r-mobile').service('LoginService', function($http, $httpParamSerializer, $q) {
+angular.module('r-mobile.services', [])
+  .service('LoginService', function($http, $httpParamSerializer, $q) {
   return {
     bearerToken: '',
     email: '',
@@ -53,11 +54,10 @@ angular.module('r-mobile').service('LoginService', function($http, $httpParamSer
 
     }
   }
-});
-
-angular.module('r-mobile').service('DocumentsService', function($http, LoginService, $q) {
+})
+  .service('DocumentsService', function($http, LoginService, $q) {
     return {
-      documents: {},
+      //documents: {},
       getDocuments: function(){
         var self = this;
         var q = $q.defer();
@@ -66,6 +66,19 @@ angular.module('r-mobile').service('DocumentsService', function($http, LoginServ
 
           self.documents = resp.data;
           console.log(JSON.stringify(self));
+          q.resolve(self.documents);
+
+        }, function(err){
+          q.reject(err);
+        });
+
+        return q.promise;
+      },
+      deleteDocument: function(id){
+        var self = this;
+        var q = $q.defer();
+        $http.delete('http://www.rembli.com/documents/api/documents/' + id , {headers: {Authorization: 'Bearer ' + LoginService.bearerToken}}).then(function(resp){
+
           q.resolve();
 
         }, function(err){
@@ -91,7 +104,7 @@ angular.module('r-mobile').service('DocumentsService', function($http, LoginServ
             .then(function(resp){
 
               console.log(JSON.stringify(resp));
-              q.resolve();
+              q.resolve(resp.data);
 
             }, function(err){
               q.reject(err);
@@ -126,10 +139,7 @@ angular.module('r-mobile').service('DocumentsService', function($http, LoginServ
 
     }
   }
-);
-
-angular.module('r-mobile')
-
+)
   .factory('FileService', function ($q, $cordovaFile) {
     return {
       imageStore: [],

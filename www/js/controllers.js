@@ -1,7 +1,6 @@
-/**
- * Created by peter on 24.10.15.
- */
-angular.module('r-mobile.controllers', [])
+'use strict';
+
+angular.module('r-mobile.controllers', ['r-mobile.services'])
   .controller('RmobileController', function($scope) {
 
     $scope.isExpanded = false;
@@ -86,7 +85,7 @@ angular.module('r-mobile.controllers', [])
 
 })
 
-  .controller('DocumentsController', function($scope, $state, $ionicLoading, DocumentsService, $stateParams, $timeout, ionicMaterialMotion, ionicMaterialInk) {
+  .controller('DocumentsController', function($scope, $state, $ionicLoading, DocumentsService, $stateParams, $timeout, ionicMaterialMotion, ionicMaterialInk,$ionicPopup) {
 
     // Set Header
     $scope.$parent.showHeader();
@@ -95,25 +94,26 @@ angular.module('r-mobile.controllers', [])
     $scope.$parent.setExpanded(false);
     $scope.$parent.setHeaderFab(false);
 
-    // Set Motion
-    $timeout(function() {
-      ionicMaterialMotion.slideUp({
-        selector: '.slide-up'
-      });
-    }, 300);
-
-    $timeout(function() {
-      ionicMaterialMotion.fadeSlideInRight({
-        startVelocity: 3000
-      });
-    }, 700);
-
     // Set Ink
-    ionicMaterialInk.displayEffect();
-
     if ($scope.documents == undefined) {
-      DocumentsService.getDocuments().then(function () {
-        $scope.documents = DocumentsService.documents;
+      DocumentsService.getDocuments().then(function (documents) {
+        $scope.documents = documents;
+        // Set Motion
+        $timeout(function() {
+          ionicMaterialMotion.slideUp({
+            selector: '.slide-up'
+          });
+        }, 300);
+
+        $timeout(function() {
+          ionicMaterialMotion.fadeSlideInRight({
+            startVelocity: 3000
+          });
+        }, 700);
+
+        // set ink
+        ionicMaterialInk.displayEffect();
+
       }, function () {
         $ionicPopup.alert({title: 'Error', template: 'Loading documents failed.'});
       })
@@ -121,29 +121,41 @@ angular.module('r-mobile.controllers', [])
 
     $scope.doRefresh = function(){
       $ionicLoading.show({template: "Refreshing Documents..."});
-      DocumentsService.getDocuments().then(function () {
-        $scope.documents = DocumentsService.documents;
+      DocumentsService.getDocuments().then(function (documents) {
+        $scope.$apply(function(){$scope.documents = documents;});
       }, function () {
         $ionicPopup.alert({title: 'Error', template: 'Loading documents failed.'});
       }).finally(function(){
         $scope.$broadcast('scroll.refreshComplete');
         $ionicLoading.hide();
       });
-    }
+    };
 
     $scope.addDocument = function(){
       $state.go('app.adddocument');
+    };
+
+    $scope.deleteDocument = function(id){
+
+      DocumentsService.deleteDocument(id).then(function(){
+        $scope.doRefresh();
+      },function(err){
+        $scope.doRefresh();
+        $ionicPopup.alert({title: 'Error', template: 'Deleting the document failed.'});
+      });
+
+
     };
 
 })
 
   .controller('LoginController', function($rootScope, $scope, LoginService, $state, $timeout, ionicMaterialInk, $ionicPopup, $ionicLoading){
 
-    $scope.$parent.clearFabs();
-    $timeout(function() {
-      $scope.$parent.hideHeader();
-    }, 0);
-    ionicMaterialInk.displayEffect();
+  $scope.$parent.clearFabs();
+  $timeout(function() {
+    $scope.$parent.hideHeader();
+  }, 0);
+  ionicMaterialInk.displayEffect();
 
     $scope.loginData = {};
   $rootScope.titleText = 'Rembli mobile';
@@ -210,7 +222,7 @@ angular.module('r-mobile.controllers', [])
       ImageService.handleMediaDialog(type).then(function() {
         $scope.images = FileService.images();
       });
-    }
+    };
 
     $scope.uploadDocument = function() {
 
@@ -223,7 +235,7 @@ angular.module('r-mobile.controllers', [])
           $scope.documentNotes = '';
           $scope.images = FileService.images();
           $ionicLoading.hide();
-          $state.go('documents');
+          $state.go('app.documents');
         }, function(err){
           console.log(JSON.stringify(err));
           $ionicLoading.hide();
@@ -236,46 +248,6 @@ angular.module('r-mobile.controllers', [])
       // zur document id weitere bilder hochladen
 
 
-      //if ($scope.images != null && $scope.images.length > 0) {
-      //
-      //  var mailImages = [];
-      //  var savedImages = $scope.images;
-      //  if ($cordovaDevice.getPlatform() == 'Android') {
-      //    // Currently only working for one image..
-      //    var imageUrl = $scope.urlForImage(savedImages[0]);
-      //    var name = imageUrl.substr(imageUrl.lastIndexOf('/') + 1);
-      //    var namePath = imageUrl.substr(0, imageUrl.lastIndexOf('/') + 1);
-      //    $cordovaFile.copyFile(namePath, name, cordova.file.externalRootDirectory, name)
-      //      .then(function(info) {
-      //        mailImages.push('' + cordova.file.externalRootDirectory + name);
-      //        $scope.openMailComposer(mailImages);
-      //      }, function(e) {
-      //        console.log(JSON.stringify(e));
-      //      });
-      //  } else {
-      //    for (var i = 0; i < savedImages.length; i++) {
-      //      mailImages.push('' + $scope.urlForImage(savedImages[i]));
-      //    }
-      //    $scope.openMailComposer(mailImages);
-      //  }
-      //}
     }
 
-    $scope.openMailComposer = function(attachments) {
-      var bodyText = '<html><h2>My Images</h2></html>';
-      var email = {
-        to: 'some@email.com',
-        attachments: attachments,
-        subject: 'Devdactic Images',
-        body: bodyText,
-        isHtml: true
-      };
-
-      $cordovaEmailComposer.open(email).then(null, function() {
-        for (var i = 0; i < attachments.length; i++) {
-          var name = attachments[i].substr(attachments[i].lastIndexOf('/') + 1);
-          $cordovaFile.removeFile(cordova.file.externalRootDirectory, name);
-        }
-      });
-    }
   });

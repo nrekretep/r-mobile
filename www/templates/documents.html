@@ -1,9 +1,9 @@
-<ion-view view-title="Documents" name="documents-view">
-  <ion-refresher
-    pulling-text="Pull to refresh..."
-    on-refresh="doRefresh()">
-  </ion-refresher>
+<ion-view hide-back-button="true" view-title="Documents" name="documents-view">
   <ion-content ng-class="{expanded:$scope.isExpanded}">
+    <ion-refresher
+      pulling-text="Pull to refresh..."
+      on-refresh="doRefresh()">
+    </ion-refresher>
     <div class="hero slide-up" style="background-image: url('img/splash.jpg');">
       <div class="content">
         <div class="avatar" style="background-image: url('img/ionic.png');"></div>
@@ -16,13 +16,17 @@
         <i class="icon ion-images"></i> Documents
       </a>
     </div>
-    <div class="list animate-fade-slide-in-right">
-      <ion-list>
-        <ion-item ng-repeat="document in documents">
-          {{document.iddocument}} - {{document.note}}
+      <ion-list show-delete="0" can-swipe="1" class="animate-fade-slide-in-right">
+        <ion-item ng-repeat="document in documents" class="list-right-editing item-button-right">
+          <ion-delete-button ng-click="" class="button-clear ion-minus-circled"></ion-delete-button>
+          <h2>{{document.note}}</h2>
+          <p>{{document.iddocument}}</p>
+          <ion-option-button class="button-positive">Edit</ion-option-button>
+          <ion-option-button class="button-info" ng-click="deleteDocument(document.iddocument)">
+            Delete
+          </ion-option-button>
         </ion-item>
       </ion-list>
-    </div>
   </ion-content>
 </ion-view>
 
