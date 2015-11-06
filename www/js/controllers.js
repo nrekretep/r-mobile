@@ -148,7 +148,15 @@ angular.module('r-mobile.controllers', ['r-mobile.services'])
     };
 
 })
-
+  .controller('DocumentController', function($scope, document){
+    // Set Header
+    $scope.$parent.showHeader();
+    $scope.$parent.clearFabs();
+    $scope.isExpanded = false;
+    $scope.$parent.setExpanded(false);
+    $scope.$parent.setHeaderFab(false);
+    $scope.document = document;
+  })
   .controller('LoginController', function($rootScope, $scope, LoginService, $state, $timeout, ionicMaterialInk, $ionicPopup, $ionicLoading){
 
   $scope.$parent.clearFabs();
@@ -170,7 +178,7 @@ angular.module('r-mobile.controllers', ['r-mobile.services'])
         $rootScope.subTitle = LoginService.email;
         $rootScope.title = LoginService.username;
 
-        $state.go('app.documents');
+        $state.go('app.documents.index');
 
       }, function(err){
         $ionicPopup.alert({title: 'Error', template: 'Getting additional user info failed.'});
@@ -230,12 +238,21 @@ angular.module('r-mobile.controllers', ['r-mobile.services'])
       //$scope.images = FileService.images();
       if ($scope.images != null && $scope.images.length > 0) {
         $ionicLoading.show({template: 'Uploading Document ...'});
-        DocumentsService.createDocument($scope.urlForImage($scope.images[0]), $scope.documentNotes).then(function(){
-          FileService.clearImages();
-          $scope.documentNotes = '';
-          $scope.images = FileService.images();
-          $ionicLoading.hide();
-          $state.go('app.documents');
+        DocumentsService.createDocument($scope.urlForImage($scope.images[0]), $scope.documentNotes).then(function(documentId){
+
+
+          $scope.uploadFiles($scope.images.slice(1)).done(function(results){
+
+            FileService.clearImages();
+            $scope.documentNotes = '';
+            $scope.images = FileService.images();
+            $ionicLoading.hide();
+            $state.go('app.documents.index');
+
+          }, function(err){
+
+          });
+
         }, function(err){
           console.log(JSON.stringify(err));
           $ionicLoading.hide();
@@ -248,6 +265,13 @@ angular.module('r-mobile.controllers', ['r-mobile.services'])
       // zur document id weitere bilder hochladen
 
 
-    }
+    };
+
+    $scope.uploadFiles = function(files){
+      return Promise.all(files.map($scope.uploadFile));
+    };
+    $scope.uploadFile = function(file){
+
+    };
 
   });

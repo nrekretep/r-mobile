@@ -1,4 +1,4 @@
-<ion-view hide-back-button="true" view-title="Documents" name="documents-view">
+<ion-view hide-back-button="true" view-title="All Documents" name="documents-view">
   <ion-content ng-class="{expanded:$scope.isExpanded}">
     <ion-refresher
       pulling-text="Pull to refresh..."
@@ -17,8 +17,7 @@
       </a>
     </div>
       <ion-list show-delete="0" can-swipe="1" class="animate-fade-slide-in-right">
-        <ion-item ng-repeat="document in documents" class="list-right-editing item-button-right">
-          <ion-delete-button ng-click="" class="button-clear ion-minus-circled"></ion-delete-button>
+        <ion-item ui-sref="app.documents.files({documentIndex: $index})" ng-repeat="document in documents" class="list-right-editing item-button-right">
           <h2>{{document.note}}</h2>
           <p>{{document.iddocument}}</p>
           <ion-option-button class="button-positive">Edit</ion-option-button>

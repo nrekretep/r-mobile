@@ -56,6 +56,7 @@ angular.module('r-mobile.services', [])
   }
 })
   .service('DocumentsService', function($http, LoginService, $q) {
+
     return {
       //documents: {},
       getDocuments: function(){
@@ -73,6 +74,11 @@ angular.module('r-mobile.services', [])
         });
 
         return q.promise;
+      },
+      getDocument: function(index){
+        console.log("Document Index" + index);
+        return this.documents[index];
+
       },
       deleteDocument: function(id){
         var self = this;

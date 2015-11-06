@@ -25,12 +25,12 @@ angular.module('r-mobile', ['ionic', 'r-mobile.controllers', 'r-mobile.services'
     // configure default route
     $urlRouterProvider.otherwise('/app/login')
 
-  $stateProvider.state('app', {
-    url: '/app',
-    abstract: true,
-    templateUrl: 'templates/menu.html',
-    controller: 'RmobileController'
-  })
+    $stateProvider.state('app', {
+      url: '/app',
+      abstract: true,
+      templateUrl: 'templates/menu.html',
+      controller: 'RmobileController'
+    })
     .state('app.login', {
       url: '/login',
       views: {
@@ -45,16 +45,32 @@ angular.module('r-mobile', ['ionic', 'r-mobile.controllers', 'r-mobile.services'
   })
     .state('app.documents', {
       url: '/documents',
+      abstract: true,
       views: {
       'menuContent': {
-        templateUrl: 'templates/documents.html',
-        controller: 'DocumentsController'
+        template: '<ion-nav-view></ion-nav-view>'
       },
       'fabContent': {
         template: '<button id="fab-profile" ng-click="addDocument()" class="button button-fab button-fab-bottom-right button-energized-900"><i class="icon ion-plus"></i></button>',
         controller: 'DocumentsController'
       }
   }})
+    .state('app.documents.index', {
+      url: '',
+      templateUrl: 'templates/documents.html',
+      controller: 'DocumentsController'
+    })
+    .state('app.documents.files', {
+      url: '/:documentIndex',
+      templateUrl: 'templates/document.html',
+      controller: 'DocumentController',
+      resolve: {
+        document: function ($stateParams, DocumentsService) {
+          console.log('Index of document ' + $stateParams.documentIndex);
+          return DocumentsService.getDocument($stateParams.documentIndex);
+        }
+      }
+    })
     .state('app.adddocument', {
       url: '/add-document',
       views: {
