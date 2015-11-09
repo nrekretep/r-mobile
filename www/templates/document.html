@@ -2,10 +2,20 @@
   <ion-content>
     <div class="item">
       <h2>{{document.note}}</h2>
-    <i>id: {{document.iddocument}}</i>
-    <i>author: {{document.createdBy}}</i>
-    <i>created: {{document.createdOn| date:'dd.MM.yyyy HH:mm'}}</i>
-    <i>changed: {{document.changedOn| date:'dd.MM.yyyy HH:mm'}}</i>
+      <i>id: {{document.iddocument}}</i>
+      <i>author: {{document.createdBy}}</i>
+      <i>created: {{document.createdOn| date:'dd.MM.yyyy HH:mm'}}</i>
+      <i>changed: {{document.changedOn| date:'dd.MM.yyyy HH:mm'}}</i>
+
+      <ion-list show-delete="0">
+        <ion-item ng-repeat="file in document.files" class="list-right-editing item-button-right">
+          <h2><a href="http://www.rembli.com/documents/api/documents/{{document.iddocument}}/files/{{file.idfile}}">{{file.fileName}}</a></h2>
+          <p>{{file.fileType}}</p>
+          <p>{{file.idfile}}</p>
+        </ion-item>
+      </ion-list>
+
     </div>
+
   </ion-content>
 </ion-view>

@@ -77,7 +77,30 @@ angular.module('r-mobile.services', [])
       },
       getDocument: function(index){
         console.log("Document Index" + index);
-        return this.documents[index];
+        var selectedDocument = this.documents[index];
+
+        var self = this;
+        var q = $q.defer();
+
+        if(!selectedDocument.files) {
+
+          console.log('No files for document ' + selectedDocument.iddocument);
+
+          var documentId = selectedDocument.iddocument;
+
+          $http.get('http://www.rembli.com/documents/api/documents/' + documentId + '/files', {headers: {Authorization: 'Bearer ' + LoginService.bearerToken}}).then(function (resp) {
+            selectedDocument.files = resp.data;
+            console.log(JSON.stringify(selectedDocument));
+            q.resolve(selectedDocument);
+          }, function (err) {
+            q.reject(err);
+          });
+        } else {
+          console.log(JSON.stringify(selectedDocument));
+          q.resolve(selectedDocument);
+        }
+
+        return q.promise;
 
       },
       deleteDocument: function(id){

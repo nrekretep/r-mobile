@@ -155,6 +155,7 @@ angular.module('r-mobile.controllers', ['r-mobile.services'])
     $scope.isExpanded = false;
     $scope.$parent.setExpanded(false);
     $scope.$parent.setHeaderFab(false);
+    console.log(JSON.stringify(document));
     $scope.document = document;
   })
   .controller('LoginController', function($rootScope, $scope, LoginService, $state, $timeout, ionicMaterialInk, $ionicPopup, $ionicLoading){
