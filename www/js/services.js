@@ -24,6 +24,8 @@ angular.module('r-mobile.services', [])
 
       $http(request).then(function(res) {
 
+        console.log(JSON.stringify(res));
+
         self.bearerToken = res.data;
 
         q.resolve();
@@ -40,7 +42,7 @@ angular.module('r-mobile.services', [])
       var self = this;
       var q = $q.defer();
 
-      $http.get('http://www.rembli.com/documents/api/userInfo', {headers: {Authorization: 'Bearer ' + self.bearerToken}}).then(function(resp){
+      $http.get('http://www.rembli.com/documents/api/userInfo', {headers: {Authorization: self.bearerToken}}).then(function(resp){
         self.username = resp.data.username;
         self.email = resp.data.email;
 
@@ -63,7 +65,7 @@ angular.module('r-mobile.services', [])
         var self = this;
         var q = $q.defer();
 
-        $http.get('http://www.rembli.com/documents/api/documents', {headers: {Authorization: 'Bearer ' + LoginService.bearerToken}}).then(function(resp){
+        $http.get('http://www.rembli.com/documents/api/documents', {headers: {Authorization: LoginService.bearerToken}}).then(function(resp){
 
           self.documents = resp.data;
           console.log(JSON.stringify(self));
@@ -88,7 +90,7 @@ angular.module('r-mobile.services', [])
 
           var documentId = selectedDocument.iddocument;
 
-          $http.get('http://www.rembli.com/documents/api/documents/' + documentId + '/files', {headers: {Authorization: 'Bearer ' + LoginService.bearerToken}}).then(function (resp) {
+          $http.get('http://www.rembli.com/documents/api/documents/' + documentId + '/files', {headers: {Authorization: LoginService.bearerToken}}).then(function (resp) {
             selectedDocument.files = resp.data;
             console.log(JSON.stringify(selectedDocument));
             q.resolve(selectedDocument);
@@ -106,7 +108,7 @@ angular.module('r-mobile.services', [])
       deleteDocument: function(id){
         var self = this;
         var q = $q.defer();
-        $http.delete('http://www.rembli.com/documents/api/documents/' + id , {headers: {Authorization: 'Bearer ' + LoginService.bearerToken}}).then(function(resp){
+        $http.delete('http://www.rembli.com/documents/api/documents/' + id , {headers: {Authorization: LoginService.bearerToken}}).then(function(resp){
 
           q.resolve();
 
@@ -129,7 +131,7 @@ angular.module('r-mobile.services', [])
 
           $http.post('http://www.rembli.com/documents/api/documents', fd, {
             transformRequest: angular.identity,
-            headers: {Authorization: 'Bearer ' + LoginService.bearerToken, 'Content-Type': undefined}})
+            headers: {Authorization: LoginService.bearerToken, 'Content-Type': undefined}})
             .then(function(resp){
 
               console.log(JSON.stringify(resp));
